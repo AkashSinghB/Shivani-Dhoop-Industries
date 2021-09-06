@@ -18,8 +18,9 @@ body {
   );
   user-select: none;
 }
-#header {
-}
+/* #header {
+  
+} */
 .nav-panel {
   display: flex;
   justify-content: space-between;
@@ -101,6 +102,7 @@ body {
   width: 15px;
 }
 #intro {
+  display: block;
 }
 .intro-text {
   margin: 7vh 0 0 10px;
@@ -286,7 +288,7 @@ body {
 .btnArrow i {
   font-size: 1.8em;
   font-weight: 700;
-  margin-left: 5px;
+  margin-left: 3px;
 }
 .btnArrow:hover {
   background: #ff0073;
@@ -301,6 +303,7 @@ body {
   transition: 0.3s ease-in;
 }
 #about {
+  display: block;
 }
 .about-us {
   height: 50vh;
