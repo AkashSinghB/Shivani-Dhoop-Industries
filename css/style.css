@@ -49,6 +49,18 @@ body {
 #nav-menu {
   cursor: pointer;
 }
+#nav-menu:hover #span2 {
+  width: 100%;
+  transition: 0.5s;
+}
+#nav-menu:hover #span3 {
+  width: 100%;
+  transition: 0.5s ease-out;
+}
+#nav-menu:active #span2,
+#span3 {
+  width: 100%;
+}
 .hamburger {
   width: 26px;
   height: 14px;
@@ -59,19 +71,6 @@ body {
   justify-content: space-between;
   align-items: flex-end;
   height: 100%;
-  /* width: 60px;
-  height: 45px;
-  position: relative;
-  margin: 50px auto;
-  -webkit-transform: rotate(0deg);
-  -moz-transform: rotate(0deg);
-  -o-transform: rotate(0deg);
-  transform: rotate(0deg);
-  -webkit-transition: 0.5s ease-in-out;
-  -moz-transition: 0.5s ease-in-out;
-  -o-transition: 0.5s ease-in-out;
-  transition: 0.5s ease-in-out;
-  cursor: pointer; */
 }
 #nav-icon span {
   display: block;
@@ -217,18 +216,6 @@ body {
 .custom-icon4 img {
   width: 100%;
 }
-
-#who-we-ar {
-  position: relative;
-  margin: 0;
-  padding: 0;
-  background-image: url(../img/whiteDesign2.png);
-  background-position-x: 70%;
-  background-position-y: -6vh;
-  background-size: 150% 150%;
-  background-size: cover;
-  background-repeat: no-repeat;
-}
 .whiteDesign {
   position: absolute;
   width: 100%;
@@ -243,7 +230,7 @@ body {
   margin-top: 15vh;
 }
 .content {
-  padding: 0 20px 0 20px;
+  padding: 0 10px 0 10px;
 }
 .content h1 {
   font-size: 28px;
@@ -297,14 +284,77 @@ body {
 .btnArrow:active {
   box-shadow: 4px 6px 13px rgba(0, 0, 0, 0.3);
   background: #ff0073;
-  color: #fed8cd;
+  color: #ffffff;
   transition: 0.3s ease-in;
 }
-#about {
+#our-products {
   display: block;
 }
-.about-us {
-  height: 50vh;
+.heading-text {
+  margin-top: 15vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.heading-text h1 {
+  font-size: 28px;
+  font-weight: bold;
+}
+.heading-text span {
+  display: block;
+  height: 0.3em;
+  width: 10em;
+  background: #ff0073;
+  border-radius: 9px;
+  margin-top: -0.4em;
+}
+.product-grid {
+  padding-top: 5vh;
+  display: grid;
+  grid-template-columns: repeat(2, 48%);
+  gap: 2vh;
+  align-content: space-between;
+  justify-content: center;
+  align-items: center;
+  justify-items: center;
+  text-align: center;
+}
+.new-item {
+  padding: 5px;
+  width: 180px;
+  overflow: hidden;
+  height: 320px;
+}
+.new-item:hover {
+  background: #ffffff;
+  box-shadow: 4px 6px 13px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+.new-item:active {
+  background: #ffffff;
+  /* transition: 0.5s ease-in; */
+  box-shadow: 4px 6px 13px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+}
+.prod-image {
+  height: 25vh;
+  height: 70%;
+  display: flex;
+  align-items: center;
+}
+.prod-content {
+  height: 30%;
+}
+.prod-image img {
+  width: 100%;
+}
+.product-grid h6 {
+  font-weight: bold;
+  font-size: 15px;
+}
+.product-grid p {
+  font-size: 13px;
 }
 
 /* desktop */
