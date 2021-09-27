@@ -51,8 +51,8 @@ body {
   cursor: pointer;
 }
 .hamburger {
-  width: 30px;
-  height: 16px;
+  width: 26px;
+  height: 14px;
 }
 #nav-icon {
   display: flex;
@@ -95,10 +95,10 @@ body {
   width: 100%;
 }
 #span2 {
-  width: 23px;
+  width: 80%;
 }
 #span3 {
-  width: 15px;
+  width: 50%;
 }
 #intro {
   display: block;
