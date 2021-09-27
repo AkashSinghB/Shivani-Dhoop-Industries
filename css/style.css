@@ -51,7 +51,7 @@ body {
   cursor: pointer;
 }
 .hamburger {
-  width: 26px;
+  width: 28px;
   height: 14px;
 }
 #nav-icon {
@@ -79,7 +79,7 @@ body {
   /* position: absolute; */
   height: 4px;
   background: #ff0073;
-  border-radius: 9px;
+  border-radius: 20px;
   opacity: 1;
   left: 0;
   -webkit-transform: rotate(0deg);
@@ -95,7 +95,7 @@ body {
   width: 100%;
 }
 #span2 {
-  width: 80%;
+  width: 75%;
 }
 #span3 {
   width: 50%;
