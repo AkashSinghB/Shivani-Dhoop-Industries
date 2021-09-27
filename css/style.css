@@ -350,11 +350,12 @@ body {
   width: 100%;
 }
 .product-grid h6 {
-  font-weight: bold;
-  font-size: 15px;
+  font-weight: 600;
+  font-size: 14px;
+  color: black;
 }
 .product-grid p {
-  font-size: 13px;
+  font-size: 11px;
 }
 
 /* desktop */
