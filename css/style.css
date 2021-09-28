@@ -38,7 +38,7 @@ body {
 .logo-text {
   display: flex;
   margin-left: 10px;
-  /* font-size: 15px; */
+   font-size: 13px;
   align-items: center;
   letter-spacing: -0.5px;
   /* transform: scale(1, 1.1); */
