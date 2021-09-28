@@ -106,18 +106,18 @@ body {
   width: 70%;
 }
 .intro-text h1 {
-  font-size: 35px;
+  font-size: 34px;
   font-weight: 300;
 }
 .intro-text h2 {
-  font-size: 35px;
+  font-size: 34px;
   font-weight: bold;
   line-height: 0.8em;
 }
 .intro-text p {
   width: 80%;
   margin-top: 30px;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5 em;
   overflow: hidden;
   text-align: justify;
