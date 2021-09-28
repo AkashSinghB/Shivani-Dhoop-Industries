@@ -145,7 +145,7 @@ body {
   align-items: center;
   justify-content: center;
   background: white;
-  font-size: 11px;
+  font-size: 1em;
   color: #ff0073;
   font-weight: bold;
   width: 12em;
@@ -169,8 +169,8 @@ body {
 }
 .btnExplore i {
   /* width: 0.6em; */
-  margin-left: 5px;
-  font-size: 20px;
+  margin-left: 6px;
+  font-size: 16px;
   font-weight: 600;
 }
 
