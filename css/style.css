@@ -115,15 +115,15 @@ body {
   line-height: 0.8em;
 }
 .intro-text p {
-  width: 80%;
+  width: 90%;
   margin-top: 30px;
   font-size: 13px;
-  line-height: 1.5 em;
+  /* line-height: 1.5 em; */
   overflow: hidden;
   text-align: justify;
-  word-break: break-all;
-  /* hyphens: auto; */
-  flex-wrap: wrap;
+  word-break: normal;
+  hyphens: auto;
+  color: #000000;
 }
 .intro-img {
   display: flex;
@@ -248,10 +248,12 @@ body {
 .content p {
   margin-top: 2em;
   text-align: justify;
-  word-break: break-all;
+  word-break: normal;
   font-size: 14px;
   line-height: 1.5 em;
-  word-spacing: -0.7px;
+  /* word-spacing: -0.7px; */
+  color: #000000;
+  hyphens: auto;
 }
 .whoWeAre-btn {
   display: flex;
