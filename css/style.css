@@ -145,10 +145,10 @@ body {
   align-items: center;
   justify-content: center;
   background: white;
-  font-size: 10px;
+  font-size: 11px;
   color: #ff0073;
-  font-weight: 600;
-  width: 11.5em;
+  font-weight: bold;
+  width: 12em;
   height: 3.5em;
   /* text-align: center; */
   border: none;
