@@ -38,7 +38,7 @@ body {
 .logo-text {
   display: flex;
   margin-left: 10px;
-  /* font-size: 15px; */
+  font-size: 14px;
   align-items: center;
   letter-spacing: -0.5px;
   /* transform: scale(1, 1.1); */
@@ -106,18 +106,18 @@ body {
   width: 70%;
 }
 .intro-text h1 {
-  font-size: 35px;
+  font-size: 34px;
   font-weight: 300;
 }
 .intro-text h2 {
-  font-size: 35px;
+  font-size: 34px;
   font-weight: bold;
   line-height: 0.8em;
 }
 .intro-text p {
   width: 90%;
   margin-top: 30px;
-  font-size: 13px;
+  font-size: 12px;
   /* line-height: 1.5 em; */
   overflow: hidden;
   text-align: justify;
@@ -145,10 +145,10 @@ body {
   align-items: center;
   justify-content: center;
   background: white;
-  font-size: 12px;
+  font-size: 11px;
   color: #ff0073;
   font-weight: bold;
-  width: 11em;
+  width: 12em;
   height: 3em;
   /* text-align: center; */
   border: none;
@@ -169,8 +169,8 @@ body {
 }
 .btnExplore i {
   /* width: 0.6em; */
-  margin-left: 5px;
-  font-size: 20px;
+  margin-left: 6px;
+  font-size: 16px;
   font-weight: 600;
 }
 
@@ -249,8 +249,9 @@ body {
   margin-top: 2em;
   text-align: justify;
   word-break: normal;
-  font-size: 14px;
-  line-height: 1.5 em;
+  font-size: 13px;
+  font-weight: 500;
+  /* line-height: 1.5 em; */
   /* word-spacing: -0.7px; */
   color: #000000;
   hyphens: auto;
