@@ -361,13 +361,98 @@ body {
   font-size: 11px;
 }
 
-.footerSection {
+#contact-us {
+}
+.contactForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+.contactTextbox {
+  margin-top: 1rem;
+  width: 100%;
+}
+.contactTextbox input,
+textarea {
+  border: none;
+  padding: 10px 10px;
+  outline: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  width: 100%;
+  outline: #000000;
+}
+.contactTextbox input:focus,
+textarea:focus {
+  /* color: #495057; */
+  /* background-color: #fff;s */
+  /* border: 1px solid #ced4da; */
+
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgb(0 123 255 / 25%);
+}
+.contactBtn {
+  margin-top: 1rem;
+}
+.contactBtn button {
+  color: #ff0073;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  width: 12em;
+  height: 3em;
+  font-size: 0.85rem;
+  border: none;
+  border-radius: 40px;
+  box-shadow: 4px 6px 13px rgba(0, 0, 0, 0.1);
+  font-weight: 600;
+}
+.contactBtn button:hover {
+  background: #ff0073;
+  color: #ffffff;
+  transition: 0.5s ease-in;
+  box-shadow: 4px 6px 13px rgba(0, 0, 0, 0.3);
+}
+.contactBtn button:active {
+  box-shadow: 4px 6px 13px rgba(0, 0, 0, 0.3);
+  background: #ff0073;
+  color: #ffffff;
+  transition: 0.3s ease-in;
+}
+
+#brandLogoListing {
+  background: #ffffff;
+}
+
+.brandLogos {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 10vh;
+  margin-top: 3rem;
+}
+.brandLogos h6 {
+  font-size: 0.8rem;
+}
+.brandImages {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+footer {
   background: #3e3e3e;
+}
+
+.footerSection {
   padding: 25px 12px 30px 12px;
   display: block;
-
   width: 100%;
-  /* text-align: center; */
 }
 .footerList {
   display: grid;
@@ -389,7 +474,7 @@ body {
 .footerTextbox {
   align-items: center;
   display: flex;
-  margin-top: 8px;
+  margin-top: 1rem;
 }
 .footerTextbox input {
   border: none;
@@ -400,8 +485,9 @@ body {
   width: 16em;
   height: 2.5em;
 }
-.footerTextbox input:active {
-  border: #ff0073;
+.footerTextbox input:focus {
+  border-color: #80bdff;
+  box-shadow: 0 0 0 0.2rem rgb(0 123 255 / 25%);
 }
 .footerBtn {
   display: flex;
