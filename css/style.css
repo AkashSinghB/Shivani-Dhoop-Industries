@@ -1,6 +1,6 @@
 /* mobile first */
 
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600&display=swap");
 
 * {
   margin: 0;
@@ -111,7 +111,7 @@ body {
 }
 .intro-text h2 {
   font-size: 34px;
-  font-weight: bold;
+  font-weight: 700;
   line-height: 0.8em;
 }
 .intro-text p {
@@ -147,7 +147,7 @@ body {
   background: white;
   font-size: 11px;
   color: #ff0073;
-  font-weight: bold;
+  font-weight: 700;
   width: 12em;
   height: 3em;
   /* text-align: center; */
@@ -359,6 +359,79 @@ body {
 }
 .product-grid p {
   font-size: 11px;
+}
+
+.footerSection {
+  background: #3e3e3e;
+  padding: 25px 12px 30px 12px;
+  display: block;
+
+  width: 100%;
+  /* text-align: center; */
+}
+.footerList {
+  display: grid;
+  justify-content: center;
+}
+
+.footerListHead {
+  color: #ff0073;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.footerListContent {
+  font-weight: 400;
+  color: #ffffff;
+  list-style: none;
+  font-size: 13px;
+  padding: 0;
+}
+.footerTextbox {
+  align-items: center;
+  display: flex;
+  margin-top: 8px;
+}
+.footerTextbox input {
+  border: none;
+  padding: 5px 10px;
+  outline: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  width: 16em;
+  height: 2.5em;
+}
+.footerTextbox input:active {
+  border: #ff0073;
+}
+.footerBtn {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+.btnSubscribe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fecbe2;
+  font-size: 0.6rem;
+  color: #ff0073;
+  font-weight: 600;
+  width: 11em;
+  height: 3em;
+  border: none;
+  border-radius: 40px;
+  /* box-shadow: 4px 6px 13px rgba(0, 0, 0, 0.1); */
+}
+.copyrightSec {
+  background: #ff0073;
+  width: 100%;
+  display: block;
+  font-size: 0.7rem;
+  text-align: center;
+  padding: 10px;
+}
+.copyrightSec span {
+  color: #ffffff;
 }
 
 /* desktop */
