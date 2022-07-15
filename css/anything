@@ -1,0 +1,769 @@
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Data;
+using System.Data.SqlClient;
+using System.Linq;
+using System.Web;
+using System.IO;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using CCRH.APP_DAL;
+
+
+
+namespace CCRH.UI.MasterData
+{
+    public partial class Drug : System.Web.UI.Page
+    {
+        #region Variables
+        string DomainPath = "", ProcName = "DrugMastProc";
+        DataClass dataclass = new DataClass();
+        PubCls mycls = new PubCls();
+        string action = "", modcode = "", rootpath = "", uploadfilename = "";
+        int Pid = 0;
+        List<SqlParameter> param = new List<SqlParameter>();
+        #endregion
+
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                DomainPath = ConfigurationManager.AppSettings.Get("DomainPath");
+                rootpath = ConfigurationManager.AppSettings.Get("rootPath");
+                //rootpath += "assets\\Document_Library\\DrugMaster";//sunil5_7_22
+                if (Session["USER_PID"] == null)
+                    Response.Redirect(DomainPath + "login.aspx");
+                if (Request.QueryString["action"] != null)
+                    action = mycls.Decrypt(Request.QueryString["action"].ToString().Trim());
+                else
+                    Response.Redirect(DomainPath + "login.aspx");
+                if (Request.QueryString["axbycz"] != null)
+                    Pid = Convert.ToInt32(Request.QueryString["axbycz"].ToString().Trim());
+                if (Request.QueryString["modcode"] != null)
+                    modcode = mycls.Decrypt(Request.QueryString["modcode"].ToString().Trim());
+                else
+                    Response.Redirect(DomainPath + "login.aspx");
+                lbl_Error.Text = "";
+                if (action == "Edit")
+                {
+                    btnSave.Text = "Update";
+                    if (chkcomplete.Checked == true)
+                    {
+                        chkretrial.Enabled = true;
+                        HideCompleteDate.Visible = true;
+                    }
+                    else
+                    {
+                        chkretrial.Enabled = false;
+                        chkretrial.Checked = false;
+                        HideCompleteDate.Visible = false;
+                        HideRetrialDate.Visible = false;
+                    }
+                }
+                if (action == "View")
+                {
+                    pnldisable.Enabled = false;
+                    btnSave.Visible = false;
+                    FileUpload1.Enabled = false;
+                }
+                if (!Page.IsPostBack)
+                {
+                    DataTable dtHeading = new DataTable();
+                    mycls.GetModuleHeading(modcode, ref dtHeading);
+                    if (dtHeading.Rows.Count > 0)
+                        lblModName.Text = dtHeading.Rows[0]["Mod_Name"].ToString() + " / ";
+                    lblAction.Text = action;
+                    //ViewState["dtGetfilename"] = "";
+                    ViewState["DrugCode"] = "";
+                    DropDownDdlcSource();
+                    GetValueInField();
+                   
+                    //if (FileUpload1.HasFile)
+                    //{
+                    //    lbl_file.Text = FileUpload1.FileName;
+                    //}
+                    //else
+                    //{
+                    //    lbl_file.Text = Convert.ToString(ViewState["dtGetfilename"]);
+                    //}//sunil 5_7_22
+                    if (chkcomplete.Checked == true)
+                    {
+                        chkretrial.Enabled = true;
+                        HideCompleteDate.Visible = true;
+                    }
+                    else
+                    {
+                        chkretrial.Enabled = false;
+                        chkretrial.Checked = false;
+                        HideCompleteDate.Visible = false;
+                        HideRetrialDate.Visible = false;
+                    }
+                    if (Convert.ToBoolean(ViewState["chkretrial"]) == true)
+                    {
+                        HideRetrialDate.Visible = true;
+                    }
+                    else
+                    {
+                        HideRetrialDate.Visible = false;
+                    }
+                    showTrialCycle();
+                    if (action == "Add")
+                    { drugcode(); }
+                    FinalToTemp();
+                    AutoTempFileDelete();
+                }
+                if (chkactive.Checked == true)
+                {
+                    HideActiveDate.Visible = true;
+                } 
+            }
+            catch (Exception ex)
+            {
+                mycls.WriteErrorLog(lblModName.Text, ex);
+                ShowError(ex.Message);
+            }
+        }
+
+        protected void btnSave_Click(object sender, EventArgs e)
+        {
+            ValidateMainData();
+        }
+
+        private void ShowError(string ErrorMessage)
+        {
+            lbl_Error.Text = ErrorMessage;
+            lbl_Error.Visible = true;
+
+        }
+        protected void btnCancel_Click(object sender, EventArgs e)
+        {
+            Response.Redirect("~/Home.aspx?modcode=" + mycls.Encrypt(modcode));
+        }
+
+        //protected void btnUpload_Click(object sender, EventArgs e)
+        //{
+
+        //    fileupload();
+        //}
+
+        public void ValidateMainData()
+        {
+            try
+            {
+                if (txtdrugcode.Text.Trim() == "")
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Drug Code " + mycls.dynamicMsg(7) + "');", true);
+                    return;
+                }
+                else if (txtdrugname.Text.Trim() == "")
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Drug Name " + mycls.dynamicMsg(7) + "');", true);
+                    return;
+                }
+                else if (chkcomplete.Checked == true)
+                {
+                    if (txtcompletedate.Text.Trim() == "")
+                    {
+                        ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Complete Date " + mycls.dynamicMsg(7) + "');", true);
+                        return;
+                    }
+                }
+                if (chkretrial.Checked == true)
+                {
+                    if (txtretrialDate.Text.Trim() == "")
+                    {
+                        ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Retrial Date " + mycls.dynamicMsg(7) + "');", true);
+                        return;
+                    }
+                }
+
+                string testrootpath = rootpath + "assets" + "\\" + "Document_Library" + "\\" + "DrugMaster" + "\\" + "DrugFinal" + "\\" + Convert.ToString(ViewState["dtGetfilename"]) + "\\" + Convert.ToString(HiddenFieldFileupload.Value);
+                if (Convert.ToString(HiddenFieldFileupload.Value) == "")
+                {
+                    if (!File.Exists(testrootpath))
+                    {
+                        ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('File is mandatory');", true);
+                        return;
+                    }
+                }
+                //if (action == "Add")
+                //{
+                //    if (FileUpload1.HasFile)
+                //    {
+                //        string FileName = "", ext = "";
+                //        FileName = FileUpload1.FileName;
+
+                //        rootpath += "\\" + txtdrugcode.Text.Trim() + "\\";
+
+
+                //        ext = Path.GetExtension(this.FileUpload1.FileName);
+
+
+                //        if (ext.ToUpper() == ".PDF" || ext.ToUpper() == ".JPG" || ext.ToUpper() == ".JPEG" || ext.ToUpper() == ".PNG")
+                //        {
+
+                //            //ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Accepted only pdf file format');", true);
+                //            //return;
+
+                //        }
+
+                //        else
+                //        {
+                //            ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Accepted only pdf/jpg/jpeg/png file format');", true);
+                //            return;
+                //        }
+                //    }
+                //    else
+                //    {
+                //        ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('File is mandatory.');", true);
+                //        return;
+                //    }
+                //} sunil 5_7_22
+
+                //else if (FileUpload1.HasFile == false && ViewState["dtGetfilename"] == "")
+                //{
+                //    ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('File is mandatory.');", true);
+                //    return;
+                //}sunil5_7_22
+                //else if (action != "Add" && FileUpload1.HasFile == true)
+                //{
+
+                //    if (FileUpload1.HasFile)
+                //    {
+                //        string FileName = "", ext = "";
+                //        FileName = FileUpload1.FileName;
+
+                //        rootpath += "\\" + txtdrugcode.Text.Trim() + "\\";
+
+
+                //        ext = Path.GetExtension(this.FileUpload1.FileName);
+
+                //        if (ext.ToUpper() == ".PDF" || ext.ToUpper() == ".JPG" || ext.ToUpper() == ".JPEG" || ext.ToUpper() == ".PNG")
+                //        {
+
+                //            //ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Accepted only pdf file format');", true);
+                //            //return;
+
+                //        }
+
+                //        else
+                //        {
+                //            ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Accepted only pdf/jpg/jpeg/png file format');", true);
+                //            return;
+                //        }
+                //    }
+                //    else
+                //    {
+                //        ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('File is mandatory.');", true);
+                //        return;
+                //    }
+
+                //} sunil5_7_22
+
+                if (chkactive.Checked && (txtActDate.Text.Trim() == "" || txtActDate.Text.Trim() == null))
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Active Date " + mycls.dynamicMsg(7) + "');", true);
+                    return;
+                }
+                if (ddlSourceOfCode.SelectedIndex == 0)
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Source Of Drug " + mycls.dynamicMsg(7) + "');", true);
+                    return;
+                }
+                if (ddlDrugPotency.SelectedIndex == 0)
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Drug Potency " + mycls.dynamicMsg(7) + "');", true);
+                    return;
+                }
+                if (ddlParts.SelectedIndex == 0)
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Parts " + mycls.dynamicMsg(7) + "');", true);
+                    return;
+                }
+                Save();
+            }
+            catch (Exception ex)
+            {
+                mycls.WriteErrorLog(lblModName.Text, ex);
+                ShowError(ex.Message);
+            }
+        }
+
+        public void Save()
+        {
+            try
+            {
+                param.Clear();
+                param.Add(new SqlParameter("@action", action == "Add" ? "INST" : "UPDT"));
+                if (ddlSourceOfCode.SelectedValue != "0")
+                    param.Add(new SqlParameter("@SourceCodePid", ddlSourceOfCode.SelectedValue));
+                if (ddlDrugPotency.SelectedValue != "0")
+                    param.Add(new SqlParameter("@DrugPotencyPid", ddlDrugPotency.SelectedValue));
+                if (ddlParts.SelectedValue != "0")
+                    param.Add(new SqlParameter("@PartsPid", ddlParts.SelectedValue));
+                if (txtdrugcode.Text.Trim() != "")
+                    param.Add(new SqlParameter("@DrugCode", txtdrugcode.Text.Trim()));
+                if (txtdrugname.Text.Trim() != "")
+                    param.Add(new SqlParameter("@DrugName", txtdrugname.Text.Trim()));
+                if (txttrialcycle.Text.Trim() != "")
+                    param.Add(new SqlParameter("@No_of_Trial_Cycle", txttrialcycle.Text.Trim()));
+                param.Add(new SqlParameter("@Remarks", txtremarks.Text.Trim()));
+                param.Add(new SqlParameter("@Pid", Pid));
+                param.Add(new SqlParameter("@Active", chkactive.Checked));
+                param.Add(new SqlParameter("@Complete", chkcomplete.Checked));
+                param.Add(new SqlParameter("@Retrial", chkretrial.Checked));
+                if (txtcompletedate.Text.Trim() == "")
+                {
+                    param.Add(new SqlParameter("@CompleteDate", DBNull.Value));
+                }
+                else
+                {
+                    param.Add(new SqlParameter("@CompleteDate", Convert.ToDateTime(txtcompletedate.Text.Trim())));
+                }
+                if (txtretrialDate.Text.Trim() == "")
+                {
+                    param.Add(new SqlParameter("@RetrialDate", DBNull.Value));
+                }
+                else
+                {
+                    param.Add(new SqlParameter("@RetrialDate", Convert.ToDateTime(txtretrialDate.Text.Trim())));
+                }
+                if (txtRetrailCycle.Text == "")
+                {
+                    param.Add(new SqlParameter("@No_of_ReTrial_Cycle", 1));
+                }
+                else
+                {
+                    param.Add(new SqlParameter("@No_of_ReTrial_Cycle", txtRetrailCycle.Text.Trim()));
+                }
+                if (txtActDate.Text.Trim() == "")
+                {
+                    param.Add(new SqlParameter("@ActiveDate", DBNull.Value));
+                }
+                else
+                {
+                    param.Add(new SqlParameter("@ActiveDate", Convert.ToDateTime(txtActDate.Text.Trim())));
+                }
+                // param.Add(new SqlParameter("@UploadFileName", FileUpload1.HasFile == false ? ViewState["dtGetfilename"] : FileUpload1.FileName));sunil 5_7_22
+                param.Add(new SqlParameter("@UploadFileName", Convert.ToString(HiddenFieldFileupload.Value)));
+                param.Add(new SqlParameter("@InputEditBy", Convert.ToString(Session["USER_PID"])));
+                int res = dataclass.ExecuteNonQuery(ProcName, param);
+                if (res > 0)
+                {
+                    // fileupload();sunil5_7_22
+                    TemptoFinal();
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('" + (action == "Edit" ? mycls.dynamicMsg(2) : mycls.dynamicMsg(1)) + "');window.location='" + DomainPath + "Home.aspx?modcode=" + mycls.Encrypt(modcode) + "'", true);
+                    return;
+                }
+                else
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Drug  " + mycls.dynamicMsg(4) + "');", true);
+                    return;
+                }
+            }
+            catch (Exception ex)
+            {
+                mycls.WriteErrorLog(lblModName.Text, ex);
+                ShowError(ex.Message);
+            }
+        }
+
+        public void DropDownDdlcSource()
+        {
+            mycls.FillDropdown(ref ddlSourceOfCode, ProcName, new List<SqlParameter> { new SqlParameter("@action", "DDLSOURCEDRUG") });
+            mycls.FillDropdown(ref ddlDrugPotency, ProcName, new List<SqlParameter> { new SqlParameter("@action", "DDLDRUGPOTENCY") });
+            mycls.FillDropdown(ref ddlParts, ProcName, new List<SqlParameter> { new SqlParameter("@action", "DDLPARTS") });
+
+        }
+        public void GetValueInField()
+        {
+            try
+            {
+                DataTable dt = new DataTable();
+                DataSet ds = new DataSet();
+                param.Clear();
+                param.Add(new SqlParameter("@action", "SHOW"));
+                param.Add(new SqlParameter("@Pid", Pid));
+                dataclass.GetDatatable(ProcName, ref dt, param);
+                if (dt.Rows.Count > 0)
+                {
+                    ViewState["dtGetfilename"] = dt.Rows[0]["FileName"].ToString();
+                    txtdrugname.Text = dt.Rows[0]["DrugName"].ToString();
+                    txtremarks.Text = dt.Rows[0]["Remarks"].ToString();
+                    txtdrugcode.Text = dt.Rows[0]["DrugCode"].ToString();
+                    txttrialcycle.Text = dt.Rows[0]["No_of_Trial_Cycle"].ToString();
+                    HiddenFieldFileupload.Value = dt.Rows[0]["FileName"].ToString();
+                    lblfileupload.Text = Convert.ToString(HiddenFieldFileupload.Value);
+                    ViewState["dtGetfilename"] = dt.Rows[0]["FileName"].ToString();
+                    chkactive.Checked = Convert.ToBoolean(dt.Rows[0]["Active"].ToString());
+                    txtcompletedate.Text = dt.Rows[0]["CompleteDate"].ToString();
+                    chkcomplete.Checked = Convert.ToBoolean(dt.Rows[0]["Complete"].ToString());
+                    chkretrial.Checked = Convert.ToBoolean(dt.Rows[0]["Retrial"].ToString());
+                    ViewState["chkretrial"] = Convert.ToBoolean(dt.Rows[0]["Retrial"].ToString());
+                    txtRetrailCycle.Text = dt.Rows[0]["No_of_Retrial_Cycle"].ToString();
+                    txtretrialDate.Text = dt.Rows[0]["RetrialDate"].ToString();
+                    ddlSourceOfCode.SelectedValue = dt.Rows[0]["SourceCodePid"].ToString();
+                    ddlDrugPotency.SelectedValue = dt.Rows[0]["DrugPotencyPid"].ToString();
+                    ddlParts.SelectedValue = dt.Rows[0]["PartsPid"].ToString();
+                    txtActDate.Text = dt.Rows[0]["ActiveDate"].ToString();
+                }
+            }
+            catch (Exception ex)
+            {
+                // lbl_Error.Text = ex.Message;
+                mycls.WriteErrorLog(lblModName.Text, ex);
+                ShowError(ex.Message);
+            }
+        }
+
+        public void showTrialCycle()
+        {
+            try
+            {
+                param.Clear();
+                param.Add(new SqlParameter("@action", "CONFIG"));
+                param.Add(new SqlParameter("@KeyField", "Trial Cycle"));
+                string trialCycle = dataclass.ExecuteScalar(ProcName, param);
+                txttrialcycle.Text = trialCycle;
+            }
+            catch (Exception ex)
+            {
+                mycls.WriteErrorLog(lblModName.Text, ex);
+                ShowError(ex.Message);
+            }
+        }
+
+        protected void chkcomplete_CheckedChanged(object sender, EventArgs e)
+        {
+
+            if (chkcomplete.Checked == true)
+            {
+                chkretrial.Enabled = true;
+                HideCompleteDate.Visible = true;
+            }
+            else
+            {
+                chkretrial.Enabled = false;
+                chkretrial.Checked = false;
+                HideCompleteDate.Visible = false;
+                HideRetrialDate.Visible = false;
+            }
+        }
+
+        protected void chkretrial_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkretrial.Checked == true)
+            {
+
+                HideRetrialDate.Visible = true;
+
+            }
+            else
+            {
+                HideRetrialDate.Visible = false;
+            }
+        }
+
+        public void drugcode()
+        {
+            try
+            {
+                param.Clear();
+                param.Add(new SqlParameter("@action", "DrugCode"));
+                string drugcode = dataclass.ExecuteScalar(ProcName, param);
+                txtdrugcode.Text = drugcode;
+            }
+            catch (Exception ex)
+            {
+                mycls.WriteErrorLog(lblModName.Text, ex);
+                ShowError(ex.Message);
+            }
+        }
+
+        protected void chkactive_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkactive.Checked == true)
+            {
+                HideActiveDate.Visible = true;
+            }
+            else
+            {
+                HideActiveDate.Visible = false;
+            }
+        }
+
+        //public void fileupload()
+        //{
+        //    if (FileUpload1.HasFile)
+        //    {
+        //        string drugcode = "", uploadfilename = "";
+        //        drugcode = txtdrugcode.Text.Trim();
+        //        string ext = "";
+        //        ext = Path.GetExtension(this.FileUpload1.FileName);
+        //        DeleteDirectory(rootpath);
+        //        CreateDirectory(rootpath);
+        //        ViewState["uploadfilename"] = FileUpload1.FileName;
+        //        if (ext.ToUpper() == ".PDF" || ext.ToUpper() == ".JPG" || ext.ToUpper() == ".JPEG" || ext.ToUpper() == ".PNG")
+        //        {
+        //            int filesize = FileUpload1.PostedFile.ContentLength;
+        //            if (filesize > 2097152)
+        //            {
+        //                ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('File Size must be under 2 mb');", true);
+        //                return;
+        //            }
+        //            else
+        //            {
+        //                FileUpload1.SaveAs(rootpath + FileUpload1.FileName);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Accepted only pdf/png/jpeg/jpg file format');", true);
+        //            return;
+        //        }
+        //    }
+        //    else if (Convert.ToString(ViewState["dtGetfilename"]) == "" && FileUpload1.FileName == "")
+        //    {
+        //        ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('File is mandatory');", true);
+        //        return;
+        //    }
+        //} sunil 5_7_22
+        //public void DeleteDirectory(string sourceDirectory = "")
+        //{
+        //    if (Directory.Exists(sourceDirectory))
+        //    {
+        //        Directory.Delete(sourceDirectory, true);
+        //    }
+        //}sunil5_7_22
+        //public void CreateDirectory(string dirpath = "")
+        //{
+        //    if (!Directory.Exists(dirpath))
+        //    {
+        //        Directory.CreateDirectory(dirpath);
+        //    }
+        //}sunil5_7_22 
+        public void fileupload()
+        {
+            try
+            {
+                if (FileUpload1.HasFile)
+                {
+                    string File = this.FileUpload1.FileName;
+                    string Filename = HiddenFieldProver.Value;
+                    string DrugMasterrootpath = rootpath + "assets" + "\\" + "Document_Library" + "\\" + "DrugMaster" + "\\" + "DrugTemp" + "\\" + txtdrugcode.Text.Trim() + "\\";
+                    if (Directory.Exists(DrugMasterrootpath))
+                    {
+                        DeleteDirectory(DrugMasterrootpath);
+                        CreateDirectory(DrugMasterrootpath);
+                    }
+                    else
+                    {
+                        CreateDirectory(DrugMasterrootpath);
+                    }
+                    lblfileupload.Text = File;
+                    string ext = "";
+                    ext = Path.GetExtension(File);
+                    uploadfilename = Filename + FileUpload1.FileName;
+                    HiddenFieldFileupload.Value = uploadfilename;
+                    if (ext.ToUpper() == ".PDF" || ext.ToUpper() == ".JPG" || ext.ToUpper() == ".JPEG" || ext.ToUpper() == ".PNG")
+                    {
+                        int Filesize = FileUpload1.PostedFile.ContentLength;
+                        if (Filesize > 512000)
+                        {
+                            ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('File Size must be under 500 Kb');", true);
+                            return;
+                        }
+                        else
+                        {
+                            string Filelocation = DrugMasterrootpath + uploadfilename;
+                            FileUpload1.SaveAs(Filelocation);
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('Accepted only pdf/jpeg/jpg/png file format');", true);
+                        HiddenFieldFileupload.Value = "";
+                        lblfileupload.Text = "";
+                        return;
+                    }
+                }
+                else
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert(' File is Mandatory.');", true);
+                    return;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                mycls.WriteErrorLog(lblModName.Text, ex);
+                ShowError(ex.Message);
+            }
+        }
+
+        protected void btnUpload_Click(object sender, EventArgs e)
+        {
+            fileupload();
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('File Uploaded successfully.');", true);
+            ScriptManager.RegisterStartupScript(this.Page, this.GetType(), "tmp", "<script type='text/javascript'>hide();</script>", false);
+
+
+        }
+
+        protected void btnDownload_Click(object sender, EventArgs e)
+        {
+            DownloadFile();
+        }
+        public void DownloadFile()
+        {
+            try
+            {
+                string FilenameDownload = "", Url = "";
+                FilenameDownload = HiddenFieldFileupload.Value.ToString() == "" ? HiddenFielddownload.Value.ToString() :HiddenFieldFileupload.Value.ToString();
+                if (FilenameDownload != "")
+                {
+                    Url = DomainPath + @"assets/Document_Library/DrugMaster/DrugTemp/" + txtdrugcode.Text + "/" + FilenameDownload;
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "Setper", "DownloadFile('" + Url + "'); ", true);
+                }
+                else
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('File not found');", true);
+                    return;
+                }
+            }
+
+            catch (Exception ex)
+            {
+                mycls.WriteErrorLog(lblModName.Text, ex);
+                ShowError(ex.Message);
+            }
+        }
+
+        protected void btnView_Click(object sender, EventArgs e)
+        {
+            FileView();
+        }
+        public void FileView()
+        {
+            try
+            {
+                if (HiddenFieldFileupload.Value == "" && HiddenFielddownload.Value == "")
+                {
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "redirect", "alert('File not found');", true);
+                    return;
+                }
+                else
+                {
+                   // string FilenameView = HiddenFieldFileupload.Value == "" ? HiddenFielddownload.Value : HiddenFieldFileupload.Value;
+                    string filename = HiddenFieldFileupload.Value;
+                    string Url = DomainPath + @"assets/Document_Library/DrugMaster/DrugTemp/" + txtdrugcode.Text + "/" + filename;
+
+                    ScriptManager.RegisterStartupScript(Page, Page.GetType(), " ", "window.open('" + Url + "','_newtab')", true);
+                   
+                }
+            }
+            catch (Exception ex)
+            {
+                mycls.WriteErrorLog(lblModName.Text, ex);
+                ShowError(ex.Message);
+            }
+        }
+
+        public static void Copy(string sourceDirectory, string targetDirectory)
+        {
+            var diSource = new DirectoryInfo(sourceDirectory);
+            var diTarget = new DirectoryInfo(targetDirectory);
+
+            CopyAll(diSource, diTarget);
+        }
+        public static void CopyAll(DirectoryInfo source, DirectoryInfo target)
+        {
+            Directory.CreateDirectory(target.FullName);
+
+            // Copy each file into the new directory.
+            foreach (FileInfo fi in source.GetFiles())
+            {
+                Console.WriteLine(@"Copying {0}\{1}", target.FullName, fi.Name);
+                fi.CopyTo(Path.Combine(target.FullName, fi.Name), true);
+            }
+
+            // Copy each subdirectory using recursion.
+            foreach (DirectoryInfo diSourceSubDir in source.GetDirectories())
+            {
+                DirectoryInfo nextTargetSubDir =
+                    target.CreateSubdirectory(diSourceSubDir.Name);
+                CopyAll(diSourceSubDir, nextTargetSubDir);
+            }
+        }
+
+        public void DeleteDirectory(string sourceDirectory = "")
+        {
+            if (Directory.Exists(sourceDirectory))
+            {
+                Directory.Delete(sourceDirectory, true);
+            }
+        }
+        public void CreateDirectory(string dirpath = "")
+        {
+            if (!Directory.Exists(dirpath))
+            {
+                Directory.CreateDirectory(dirpath);
+            }
+        }
+
+        public void TemptoFinal()
+        {
+            string SourcePath = rootpath + "assets" + "\\" + "Document_Library" + "\\" + "DrugMaster" + "\\" + "DrugTemp" + "\\" + txtdrugcode.Text + "\\";
+            string TargetPath = rootpath + "assets" + "\\" + "Document_Library" + "\\" + "DrugMaster" + "\\" + "DrugFinal" + "\\" + txtdrugcode.Text + "\\";
+            if (!Directory.Exists(TargetPath))
+                CreateDirectory(TargetPath);
+            else
+            {
+                DeleteDirectory(TargetPath);
+                CreateDirectory(TargetPath);
+            }
+
+            if (Directory.Exists(SourcePath))
+            {
+                Copy(SourcePath, TargetPath);
+                DeleteDirectory(SourcePath);
+            }
+        }
+        public void FinalToTemp()
+        {
+            string SourcePath = rootpath + "assets" + "\\" + "Document_Library" + "\\" + "DrugMaster" + "\\" + "DrugFinal" + "\\" + txtdrugcode.Text + "\\";
+            string TargetPath = rootpath + "assets" + "\\" + "Document_Library" + "\\" + "DrugMaster" + "\\" + "DrugTemp" + "\\" + txtdrugcode.Text + "\\";
+
+            if (!Directory.Exists(TargetPath))
+                CreateDirectory(TargetPath);
+            else
+            {
+                DeleteDirectory(TargetPath);
+                CreateDirectory(TargetPath);
+            }
+
+            if (Directory.Exists(SourcePath))
+            {
+                if (Directory.Exists(TargetPath))
+                    DeleteDirectory(TargetPath);
+
+                CreateDirectory(TargetPath);
+                Copy(SourcePath, TargetPath);
+
+            }
+        }
+
+        public void AutoTempFileDelete()
+        {
+            string path = ConfigurationManager.AppSettings["rootPath"].ToString() + "assets" + "\\" + "Document_Library" + "\\" + "DrugMaster" + "\\" + "DrugTemp" + "\\";
+            DirectoryInfo directory = new DirectoryInfo(path);
+            foreach (DirectoryInfo dir in directory.GetDirectories())
+            {
+                if ((DateTime.Now - dir.CreationTime).TotalDays > 7)
+                    dir.Delete(true);
+            }
+        }
+    }
+}
